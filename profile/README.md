@@ -49,37 +49,37 @@ curl -fsSL https://raw.githubusercontent.com/dementia-panel/backend/main/deploy/
 | `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID` | Set both to enable Telegram. `TELEGRAM_THREAD_ID` is optional. |
 | `TELEGRAM_MODE`, `TELEGRAM_WEBHOOK_SECRET` | Keep `polling` by default. Set a secret if you select `webhook`. |
 
-On a fresh installation, run these commands in the directory containing `.env`. Each writes a new value directly into the file. The two keys use standard Base64, including the trailing `=`.
+On a fresh installation, run these commands in the directory containing `.env`. The commands fill empty values from the template and replace the `CHANGE_ME` placeholder. The two keys use standard Base64, including the trailing `=`.
 
 ```sh
-postgres_password="$(openssl rand -hex 32)" && sed -i "s|^POSTGRES_PASSWORD=.*$|POSTGRES_PASSWORD=$postgres_password|" .env
+postgres_password="$(openssl rand -hex 32)" && sed -i "s|^POSTGRES_PASSWORD=CHANGE_ME$|POSTGRES_PASSWORD=$postgres_password|" .env
 ```
 
 ```sh
-jwt_key="$(openssl rand -base64 32)" && sed -i "s|^JWT_SIGNING_KEY=.*$|JWT_SIGNING_KEY=$jwt_key|" .env
+jwt_key="$(openssl rand -base64 32)" && sed -i "s|^JWT_SIGNING_KEY=\(''\)\?$|JWT_SIGNING_KEY=$jwt_key|" .env
 ```
 
 ```sh
-encryption_key="$(openssl rand -base64 32)" && sed -i "s|^ENCRYPTION_KEY=.*$|ENCRYPTION_KEY=$encryption_key|" .env
+encryption_key="$(openssl rand -base64 32)" && sed -i "s|^ENCRYPTION_KEY=\(''\)\?$|ENCRYPTION_KEY=$encryption_key|" .env
 ```
 
 If you set `WEBHOOK_URL`, generate the webhook secret:
 
 ```sh
-webhook_secret="$(openssl rand -hex 32)" && sed -i "s|^WEBHOOK_SECRET_HEADER=.*$|WEBHOOK_SECRET_HEADER=$webhook_secret|" .env
+webhook_secret="$(openssl rand -hex 32)" && sed -i "s|^WEBHOOK_SECRET_HEADER=\(''\)\?$|WEBHOOK_SECRET_HEADER=$webhook_secret|" .env
 ```
 
 If you select `TELEGRAM_MODE=webhook`, generate the Telegram webhook secret. Get `TELEGRAM_BOT_TOKEN` from BotFather.
 
 ```sh
-telegram_webhook_secret="$(openssl rand -hex 32)" && sed -i "s|^TELEGRAM_WEBHOOK_SECRET=.*$|TELEGRAM_WEBHOOK_SECRET=$telegram_webhook_secret|" .env
+telegram_webhook_secret="$(openssl rand -hex 32)" && sed -i "s|^TELEGRAM_WEBHOOK_SECRET=\(''\)\?$|TELEGRAM_WEBHOOK_SECRET=$telegram_webhook_secret|" .env
 ```
 
 Keep `.env` outside version control. For an existing installation, preserve the PostgreSQL password and encryption key unless you are deliberately rotating them.
 
 ### 4. Start the backend
 
-Compose starts PostgreSQL and Valkey as dependencies. The backend applies database migrations on startup.
+Compose pulls the `latest` backend image and starts PostgreSQL and Valkey as dependencies. The backend applies database migrations on startup.
 
 ```sh
 sudo docker compose up -d --pull always --wait backend
@@ -115,6 +115,8 @@ sudo install -m 0600 /etc/letsencrypt/live/panel.example.com/privkey.pem tls/dem
 
 ### 6. Start the panel
 
+Compose pulls the `latest` panel image.
+
 ```sh
 sudo docker compose up -d --pull always --wait frontend
 ```
@@ -141,6 +143,26 @@ After renewal, repeat the two `install` commands from step 5 and reload Nginx. T
 
 ```sh
 sudo docker compose exec -T frontend nginx -s reload
+```
+
+### 10. Fix a PostgreSQL password mismatch
+
+If startup reports `could not connect to PostgreSQL` or the database is unhealthy, check its logs:
+
+```sh
+sudo docker compose logs --tail=30 db
+```
+
+If the logs show `password authentication failed`, restore the original `POSTGRES_PASSWORD` in `.env`. PostgreSQL reads that variable only when initializing an empty volume. If you need to keep the new password, change the role's password in PostgreSQL using the prompt below. Replace both instances of `backend` if you used a different PostgreSQL role. Enter the value from `.env` twice.
+
+```sh
+sudo docker compose exec db psql -U backend -d postgres -c '\password backend'
+```
+
+Apply the settings from the deployment directory. Keep the existing database volume.
+
+```sh
+sudo docker compose up -d --pull always --wait backend
 ```
 
 ## Русский
@@ -190,37 +212,37 @@ curl -fsSL https://raw.githubusercontent.com/dementia-panel/backend/main/deploy/
 | `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID` | Заполни оба поля для подключения Telegram. `TELEGRAM_THREAD_ID` необязателен. |
 | `TELEGRAM_MODE`, `TELEGRAM_WEBHOOK_SECRET` | По умолчанию оставь `polling`. Если выбран `webhook`, укажи секрет. |
 
-При первой установке выполни команды в папке с `.env`. Каждая команда записывает новое значение прямо в файл. Оба ключа записываются в стандартном Base64 вместе с завершающим знаком `=`.
+При первой установке выполни команды в папке с `.env`. Команды заполняют пустые поля шаблона и заменяют заглушку `CHANGE_ME`. Оба ключа записываются в стандартном Base64 вместе с завершающим знаком `=`.
 
 ```sh
-postgres_password="$(openssl rand -hex 32)" && sed -i "s|^POSTGRES_PASSWORD=.*$|POSTGRES_PASSWORD=$postgres_password|" .env
+postgres_password="$(openssl rand -hex 32)" && sed -i "s|^POSTGRES_PASSWORD=CHANGE_ME$|POSTGRES_PASSWORD=$postgres_password|" .env
 ```
 
 ```sh
-jwt_key="$(openssl rand -base64 32)" && sed -i "s|^JWT_SIGNING_KEY=.*$|JWT_SIGNING_KEY=$jwt_key|" .env
+jwt_key="$(openssl rand -base64 32)" && sed -i "s|^JWT_SIGNING_KEY=\(''\)\?$|JWT_SIGNING_KEY=$jwt_key|" .env
 ```
 
 ```sh
-encryption_key="$(openssl rand -base64 32)" && sed -i "s|^ENCRYPTION_KEY=.*$|ENCRYPTION_KEY=$encryption_key|" .env
+encryption_key="$(openssl rand -base64 32)" && sed -i "s|^ENCRYPTION_KEY=\(''\)\?$|ENCRYPTION_KEY=$encryption_key|" .env
 ```
 
 Если указал `WEBHOOK_URL`, сгенерируй секрет вебхука:
 
 ```sh
-webhook_secret="$(openssl rand -hex 32)" && sed -i "s|^WEBHOOK_SECRET_HEADER=.*$|WEBHOOK_SECRET_HEADER=$webhook_secret|" .env
+webhook_secret="$(openssl rand -hex 32)" && sed -i "s|^WEBHOOK_SECRET_HEADER=\(''\)\?$|WEBHOOK_SECRET_HEADER=$webhook_secret|" .env
 ```
 
 Если выбрал `TELEGRAM_MODE=webhook`, сгенерируй секрет вебхука Telegram. `TELEGRAM_BOT_TOKEN` получи у BotFather.
 
 ```sh
-telegram_webhook_secret="$(openssl rand -hex 32)" && sed -i "s|^TELEGRAM_WEBHOOK_SECRET=.*$|TELEGRAM_WEBHOOK_SECRET=$telegram_webhook_secret|" .env
+telegram_webhook_secret="$(openssl rand -hex 32)" && sed -i "s|^TELEGRAM_WEBHOOK_SECRET=\(''\)\?$|TELEGRAM_WEBHOOK_SECRET=$telegram_webhook_secret|" .env
 ```
 
 Храни `.env` вне Git. На действующей установке сохраняй пароль PostgreSQL и ключ шифрования, если не проводишь их плановую замену.
 
 ### 4. Запусти backend
 
-Compose автоматически запустит PostgreSQL и Valkey. Backend применит миграции базы при старте.
+Compose скачает образ backend с тегом `latest` и запустит PostgreSQL и Valkey как зависимости. Backend применит миграции базы при старте.
 
 ```sh
 sudo docker compose up -d --pull always --wait backend
@@ -256,6 +278,8 @@ sudo install -m 0600 /etc/letsencrypt/live/panel.example.com/privkey.pem tls/dem
 
 ### 6. Запусти панель
 
+Compose скачает образ панели с тегом `latest`.
+
 ```sh
 sudo docker compose up -d --pull always --wait frontend
 ```
@@ -282,4 +306,24 @@ sudo certbot renew --cert-name panel.example.com
 
 ```sh
 sudo docker compose exec -T frontend nginx -s reload
+```
+
+### 10. Исправь ошибку пароля PostgreSQL
+
+Если при запуске появляется `could not connect to PostgreSQL` или база получает статус `unhealthy`, проверь её логи:
+
+```sh
+sudo docker compose logs --tail=30 db
+```
+
+Если в логах есть `password authentication failed`, верни исходный `POSTGRES_PASSWORD` в `.env`. PostgreSQL применяет эту переменную только при инициализации пустого тома. Чтобы сохранить новый пароль, смени пароль роли в PostgreSQL через интерактивный запрос. Если использовал другую роль PostgreSQL, замени оба вхождения `backend` в команде. Дважды введи значение из `.env`.
+
+```sh
+sudo docker compose exec db psql -U backend -d postgres -c '\password backend'
+```
+
+Примени настройки из каталога установки. Сохрани существующий том базы.
+
+```sh
+sudo docker compose up -d --pull always --wait backend
 ```
