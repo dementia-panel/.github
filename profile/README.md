@@ -6,6 +6,12 @@
 
 dementia is a self-hosted control panel for managing AmneziaWG VPN nodes, users, and subscriptions.
 
+[API documentation](https://github.com/dementia-panel/backend/blob/main/docs/API.md#english)
+
+![dementia dashboard](https://raw.githubusercontent.com/dementia-panel/.github/main/profile/assets/dashboard.png)
+
+*Interface preview with sample data.*
+
 ### 1. Install Docker
 
 On the deployment server, configure the official Docker APT repository for your distribution, then install Docker Engine and the Compose plugin. [Ubuntu](https://docs.docker.com/engine/install/ubuntu/#install-using-the-apt-repository) · [Debian](https://docs.docker.com/engine/install/debian/#install-using-the-apt-repository)
@@ -44,7 +50,8 @@ curl -fsSL https://raw.githubusercontent.com/dementia-panel/backend/main/deploy/
 | `POSTGRES_USER`, `POSTGRES_DB` | Keep `backend` for both unless you need different names. |
 | `POSTGRES_PASSWORD` | Replace `CHANGE_ME` with a unique password. |
 | `JWT_SIGNING_KEY`, `ENCRYPTION_KEY` | Generate a separate 32-byte Base64 key for each field. Keep the encryption key with your database backups. |
-| `LOG_LEVEL`, `NODE_PING_INTERVAL_SECONDS` | Defaults: `info` and `30`. |
+| `MODE`, `LOG_LEVEL` | `MODE=prod` by default. Modes: `local`, `dev`, `prod`, `test`. Leave `LOG_LEVEL` empty to use the mode’s level, or set `debug`, `info`, `warn`, or `error`. |
+| `NODE_PING_INTERVAL_SECONDS` | Node connection check interval in seconds. Default: `30`. |
 | `WEBHOOK_URL`, `WEBHOOK_SECRET_HEADER` | Leave empty unless using a webhook. Set both to enable it. |
 | `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID` | Set both to enable Telegram. `TELEGRAM_THREAD_ID` is optional. |
 | `TELEGRAM_MODE`, `TELEGRAM_WEBHOOK_SECRET` | Keep `polling` by default. Set a secret if you select `webhook`. |
@@ -169,6 +176,12 @@ sudo docker compose up -d --pull always --wait backend
 
 dementia — панель для управления VPN-нодами AmneziaWG, пользователями и подписками на своём сервере.
 
+[Документация API](https://github.com/dementia-panel/backend/blob/main/docs/API.md#russian)
+
+![Панель управления dementia](https://raw.githubusercontent.com/dementia-panel/.github/main/profile/assets/dashboard.png)
+
+*Пример интерфейса с демонстрационными данными.*
+
 ### 1. Установи Docker
 
 На сервере подключи официальный APT-репозиторий Docker для своего дистрибутива и установи Docker Engine с плагином Compose. [Ubuntu](https://docs.docker.com/engine/install/ubuntu/#install-using-the-apt-repository) · [Debian](https://docs.docker.com/engine/install/debian/#install-using-the-apt-repository)
@@ -207,7 +220,8 @@ curl -fsSL https://raw.githubusercontent.com/dementia-panel/backend/main/deploy/
 | `POSTGRES_USER`, `POSTGRES_DB` | Оставь `backend` в обоих полях, если другие имена не нужны. |
 | `POSTGRES_PASSWORD` | Замени `CHANGE_ME` на уникальный пароль. |
 | `JWT_SIGNING_KEY`, `ENCRYPTION_KEY` | Сгенерируй для каждого поля отдельный 32-байтовый ключ в Base64. Храни ключ шифрования вместе с резервными копиями базы. |
-| `LOG_LEVEL`, `NODE_PING_INTERVAL_SECONDS` | Значения по умолчанию — `info` и `30`. |
+| `MODE`, `LOG_LEVEL` | По умолчанию `MODE=prod`. Режимы: `local`, `dev`, `prod`, `test`. Пустой `LOG_LEVEL` использует уровень режима; можно указать `debug`, `info`, `warn` или `error`. |
+| `NODE_PING_INTERVAL_SECONDS` | Интервал проверки связи с нодами в секундах. По умолчанию `30`. |
 | `WEBHOOK_URL`, `WEBHOOK_SECRET_HEADER` | Оставь пустыми, если вебхук не нужен. Для подключения заполни оба поля. |
 | `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID` | Заполни оба поля для подключения Telegram. `TELEGRAM_THREAD_ID` необязателен. |
 | `TELEGRAM_MODE`, `TELEGRAM_WEBHOOK_SECRET` | По умолчанию оставь `polling`. Если выбран `webhook`, укажи секрет. |
